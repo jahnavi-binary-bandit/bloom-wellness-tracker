@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bloom — Women's Wellness Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --rose: #e8a0a0; --rose-deep: #c97b7b; --blush: #f5e6e6; --sage: #a8c4a2; --sage-deep: #7a9e74; --lavender: #c4b4d4; --text: #3a2d2d; --text-soft: #7a6060; --card-bg: rgba(255,255,255,0.75); --shadow: 0 8px 32px rgba(200,120,120,0.10); --bg: #fdf8f4; }
+    [data-theme="dark"] { --bg: #1a1218; --text: #f0e6e6; --text-soft: #c4a4a4; --card-bg: rgba(40,28,34,0.85); --shadow: 0 8px 32px rgba(0,0,0,0.3); --blush: #2d1f24; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+    body::before { content: ''; position: fixed; top: -120px; right: -120px; width: 420px; height: 420px; background: radial-gradient(circle, #f5cece88 0%, transparent 70%); border-radius: 50%; z-index: 0; pointer-events: none; }
+    body::after { content: ''; position: fixed; bottom: -100px; left: -100px; width: 360px; height: 360px; background: radial-gradient(circle, #c4b4d455 0%, transparent 70%); border-radius: 50%; z-index: 0; pointer-events: none; }
+
+    /* AUTH PAGE */
+    .auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; position: relative; z-index: 5; }
+    .auth-card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 24px; padding: 2.5rem; width: 100%; max-width: 400px; box-shadow: var(--shadow); border: 1px solid rgba(232,160,160,0.15); }
+    .auth-logo { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--rose-deep); text-align: center; margin-bottom: 0.3rem; }
+    .auth-logo span { font-style: italic; color: var(--lavender); }
+    .auth-subtitle { text-align: center; font-size: 0.85rem; color: var(--text-soft); margin-bottom: 2rem; }
+    .auth-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-radius: 10px; overflow: hidden; border: 1.5px solid rgba(200,120,120,0.2); }
+    .auth-tab { flex: 1; padding: 0.6rem; text-align: center; font-size: 0.85rem; cursor: pointer; background: transparent; border: none; color: var(--text-soft); font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .auth-tab.active { background: var(--rose); color: white; font-weight: 500; }
+    .auth-input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid rgba(200,120,120,0.2); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); background: rgba(255,255,255,0.8); outline: none; margin-bottom: 1rem; transition: border-color 0.2s; }
+    [data-theme="dark"] .auth-input { background: rgba(40,28,34,0.8); color: var(--text); }
+    .auth-input:focus { border-color: var(--rose); }
+    .auth-btn { width: 100%; padding: 0.85rem; background: linear-gradient(135deg, var(--rose), var(--rose-deep)); color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+    .auth-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .auth-error { font-size: 0.8rem; color: var(--rose-deep); text-align: center; margin-bottom: 0.8rem; min-height: 1.2rem; }
+
+    /* DASHBOARD */
+    .dashboard { display: none; }
+    header { position: relative; z-index: 10; padding: 1.5rem 2.5rem 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--rose-deep); }
+    .logo span { font-style: italic; color: var(--lavender); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-date { font-size: 0.85rem; color: var(--text-soft); }
+    .welcome-text { font-size: 0.85rem; color: var(--rose-deep); font-weight: 500; }
+    .header-center { display: flex; gap: 0.3rem; }
+    .nav-tab { background: none; border: 1.5px solid rgba(200,120,120,0.25); border-radius: 50px; padding: 0.3rem 1rem; cursor: pointer; font-size: 0.85rem; color: var(--text-soft); font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .nav-tab:hover { border-color: var(--rose); color: var(--rose-deep); }
+    .nav-tab.active { background: var(--rose); border-color: var(--rose); color: white; font-weight: 500; }
+    .tab-page { display: none; }
+    .tab-page.active { display: block; }
+    .dark-toggle, .logout-btn { background: none; border: 1.5px solid rgba(200,120,120,0.3); border-radius: 50px; padding: 0.3rem 0.8rem; cursor: pointer; font-size: 0.82rem; color: var(--text-soft); transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .dark-toggle:hover, .logout-btn:hover { border-color: var(--rose); color: var(--rose-deep); }
+    .quote-banner { position: relative; z-index: 5; margin: 0 2.5rem 1rem; padding: 0.8rem 1.2rem; background: linear-gradient(135deg, rgba(232,160,160,0.15), rgba(196,180,212,0.15)); border-radius: 12px; border-left: 3px solid var(--rose); font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.9rem; color: var(--text-soft); }
+    main { position: relative; z-index: 5; max-width: 900px; margin: 0 auto; padding: 0 1.5rem 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 20px; padding: 1.8rem; box-shadow: var(--shadow); border: 1px solid rgba(232,160,160,0.15); animation: fadeUp 0.5s ease both; }
+    .card.full-width { grid-column: 1 / -1; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .card-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 600; color: var(--text); margin-bottom: 1.2rem; }
+    .form-group { margin-bottom: 1.1rem; }
+    label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; }
+    input[type="date"], textarea { width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid rgba(200,120,120,0.2); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); background: rgba(255,255,255,0.8); transition: border-color 0.2s; outline: none; }
+    [data-theme="dark"] input[type="date"], [data-theme="dark"] textarea { background: rgba(40,28,34,0.8); color: var(--text); }
+    input[type="date"]:focus, textarea:focus { border-color: var(--rose); }
+    input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--rose); }
+    textarea { resize: vertical; min-height: 72px; }
+    .pill-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .pill { padding: 0.38rem 0.9rem; border-radius: 50px; border: 1.5px solid rgba(200,120,120,0.25); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--text-soft); cursor: pointer; transition: all 0.18s; }
+    .pill:hover { border-color: var(--rose); color: var(--rose-deep); }
+    .pill.selected { background: var(--rose); border-color: var(--rose); color: white; font-weight: 500; }
+    .pill.energy.selected { background: var(--sage); border-color: var(--sage); }
+    .pill.symptom.selected { background: var(--lavender); border-color: var(--lavender); color: var(--text); }
+    .slider-row { display: flex; align-items: center; gap: 0.8rem; }
+    .slider-val { font-weight: 500; color: var(--rose-deep); min-width: 2.5rem; text-align: center; }
+    .taunt { font-size: 0.78rem; color: var(--lavender); font-style: italic; margin-top: 0.3rem; min-height: 1.2rem; }
+    .water-glasses { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.4rem; }
+    .glass { font-size: 1.2rem; cursor: pointer; opacity: 0.25; transition: opacity 0.2s, transform 0.1s; }
+    .glass:hover { transform: scale(1.2); }
+    .glass.filled { opacity: 1; }
+    .btn-submit { width: 100%; padding: 0.85rem; background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%); color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; margin-top: 0.5rem; transition: opacity 0.2s, transform 0.15s; }
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+    .encouragement-box { background: linear-gradient(135deg, #f9eded 0%, #ede9f5 100%); border-radius: 14px; padding: 1.1rem 1.2rem; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1rem; color: var(--rose-deep); line-height: 1.6; min-height: 60px; display: flex; align-items: center; border: 1px solid rgba(200,120,120,0.12); margin-bottom: 0.8rem; }
+    .encouragement-box.hidden { display: none; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .stat-box { background: rgba(255,255,255,0.6); border-radius: 14px; padding: 1rem; text-align: center; border: 1px solid rgba(200,120,120,0.1); }
+    [data-theme="dark"] .stat-box { background: rgba(255,255,255,0.05); }
+    .stat-number { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--rose-deep); }
+    .stat-label { font-size: 0.75rem; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.2rem; }
+    .mood-chart { display: flex; gap: 0.3rem; align-items: flex-end; height: 80px; }
+    .mood-bar-wrap { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .mood-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.4s ease; min-height: 4px; }
+    .mood-bar-label { font-size: 0.6rem; color: var(--text-soft); margin-top: 4px; }
+    .trend-btn { padding: 0.3rem 0.8rem; border-radius: 20px; border: 1.5px solid rgba(200,120,120,0.3); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-soft); cursor: pointer; transition: all 0.2s; }
+    .trend-btn.active { background: var(--rose); border-color: var(--rose); color: white; }
+    .tip-card { background: rgba(255,255,255,0.6); border-radius: 12px; padding: 0.9rem 1rem; border-left: 3px solid var(--sage); }
+    [data-theme="dark"] .tip-card { background: rgba(255,255,255,0.05); }
+    .tip-card .tip-title { font-weight: 500; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--text); }
+    .tip-card .tip-body { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+    .symptom-tag { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 50px; background: var(--blush); color: var(--rose-deep); font-size: 0.78rem; margin: 0.2rem; }
+    .predict-box { background: linear-gradient(135deg, #f9eded, #ede9f5); border-radius: 12px; padding: 1rem; text-align: center; margin-bottom: 0.8rem; }
+    .predict-date { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--rose-deep); }
+    .predict-label { font-size: 0.75rem; color: var(--text-soft); margin-top: 0.2rem; }
+    .log-list { display: flex; flex-direction: column; gap: 0.9rem; max-height: 320px; overflow-y: auto; }
+    .log-list::-webkit-scrollbar { width: 4px; }
+    .log-list::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 4px; }
+    .log-item { background: rgba(255,255,255,0.7); border-radius: 12px; padding: 0.9rem 1rem; border-left: 3px solid var(--rose); }
+    [data-theme="dark"] .log-item { background: rgba(255,255,255,0.05); }
+    .log-date { font-size: 0.75rem; color: var(--text-soft); font-weight: 500; }
+    .log-mood-badge { display: inline-block; padding: 0.18rem 0.6rem; border-radius: 50px; font-size: 0.72rem; font-weight: 500; background: var(--blush); color: var(--rose-deep); }
+    .log-notes { font-size: 0.82rem; color: var(--text-soft); margin-top: 0.2rem; }
+    .log-encouragement { font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.78rem; color: var(--lavender); margin-top: 0.1rem; }
+    .log-extras { font-size: 0.75rem; color: var(--text-soft); margin-top: 0.2rem; }
+    .empty-state { text-align: center; color: var(--text-soft); font-size: 0.9rem; padding: 2rem 0; font-style: italic; }
+    .wellness-score { text-align: center; padding: 1rem 0; }
+    .score-ring { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(var(--rose) 0%, var(--blush) 0%); margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; }
+    .score-inner { width: 80px; height: 80px; border-radius: 50%; background: var(--card-bg); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--rose-deep); }
+    .score-label { font-size: 0.78rem; color: var(--text-soft); }
+    .badge { display:inline-flex;align-items:center;gap:0.3rem;padding:0.35rem 0.8rem;border-radius:50px;font-size:0.78rem;font-weight:500;border:1.5px solid rgba(200,120,120,0.2);background:var(--blush);color:var(--rose-deep); }
+    .badge.locked { opacity:0.3;filter:grayscale(1); }
+    .pms-alert { background:linear-gradient(135deg,#f9eded,#ede9f5);border-radius:14px;padding:1rem 1.2rem;border-left:3px solid var(--rose);margin-bottom:0.8rem;font-size:0.85rem;color:var(--rose-deep); }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--sage-deep); color: white; padding: 0.8rem 1.4rem; border-radius: 12px; font-size: 0.88rem; font-weight: 500; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-width: 320px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 640px) { main { grid-template-columns: 1fr; } .card.full-width { grid-column: 1; } }
+  </style>
+</head>
+<body>
+
+<!-- AUTH PAGE -->
+<div class="auth-page" id="authPage">
+  <div class="auth-card">
+    <div class="auth-logo">bloom<span>.</span></div>
+    <div class="auth-subtitle">Your personal wellness companion 🌸</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <input class="auth-input" type="text" id="authUsername" placeholder="Username"/>
+    <input class="auth-input" type="password" id="authPassword" placeholder="Password"/>
+    <button class="auth-btn" onclick="handleAuth()">Login</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <header>
+    <div class="logo">bloom<span>.</span></div>
+    <div class="header-center">
+      <button class="nav-tab active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="nav-tab" onclick="switchTab('diary')">Diary</button>
+      <button class="nav-tab" onclick="switchTab('tracker')">Tracker</button>
+    </div>
+    <div class="header-right">
+      <span class="welcome-text" id="welcomeText"></span>
+      <button class="dark-toggle" onclick="toggleDark()">🌙 Dark</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="quote-banner" id="quoteBanner"></div>
+
+  <div class="tab-page active" id="tab-dashboard">
+  <main>
+    <!-- LOG FORM -->
+    <div class="card full-width">
+      <div class="card-title">🌸 How are you feeling today?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="logDate"/>
+        </div>
+        <div class="form-group">
+          <label>Mood</label>
+          <div class="pill-group">
+            <button class="pill mood" data-val="Happy">😊 Happy</button>
+            <button class="pill mood" data-val="Sad">😢 Sad</button>
+            <button class="pill mood" data-val="Anxious">😰 Anxious</button>
+            <button class="pill mood" data-val="Irritable">😤 Irritable</button>
+            <button class="pill mood" data-val="Calm">😌 Calm</button>
+            <button class="pill mood" data-val="Tired">😴 Tired</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Energy Level</label>
+        <div class="pill-group">
+          <button class="pill energy" data-val="High">⚡ High</button>
+          <button class="pill energy" data-val="Medium">🔋 Medium</button>
+          <button class="pill energy" data-val="Low">🪫 Low</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Symptoms</label>
+        <div class="pill-group">
+          <button class="pill symptom" data-val="Cramps">Cramps</button>
+          <button class="pill symptom" data-val="Bloating">Bloating</button>
+          <button class="pill symptom" data-val="Headache">Headache</button>
+          <button class="pill symptom" data-val="Fatigue">Fatigue</button>
+          <button class="pill symptom" data-val="Acne">Acne</button>
+          <button class="pill symptom" data-val="None">None</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label>Water Intake 💧</label>
+          <div class="water-glasses" id="waterGlasses"></div>
+          <div style="font-size:0.75rem;color:var(--text-soft);margin-top:0.3rem;"><span id="waterCount">0</span> glasses</div>
+          <div class="taunt" id="waterTaunt"></div>
+        </div>
+        <div class="form-group">
+          <label>Sleep Hours 😴</label>
+          <div class="slider-row">
+            <input type="range" id="sleepSlider" min="0" max="12" step="0.5" value="7" oninput="updateSleep(this.value)"/>
+            <span class="slider-val" id="sleepVal">7h</span>
+          </div>
+          <div class="taunt" id="sleepTaunt"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Stress Level 😰 (1–10)</label>
+        <div class="slider-row">
+          <input type="range" id="stressSlider" min="1" max="10" step="1" value="5" oninput="updateStress(this.value)"/>
+          <span class="slider-val" id="stressVal">5</span>
+        </div>
+        <div class="taunt" id="stressTaunt"></div>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="notes" placeholder="How are you really feeling today?"></textarea>
+      </div>
+      <div class="encouragement-box hidden" id="encouragementBox"></div>
+      <button class="btn-submit" onclick="submitLog()">Save Today's Log ✨</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="card">
+      <div class="card-title">📊 This Month</div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-number" id="statTotal">0</div><div class="stat-label">Days Logged</div></div>
+        <div class="stat-box"><div class="stat-number" id="statMood">—</div><div class="stat-label">Top Mood</div></div>
+        <div class="stat-box"><div class="stat-number" id="statEnergy">—</div><div class="stat-label">Avg Energy</div></div>
+      </div>
+    </div>
+
+    <!-- WELLNESS SCORE -->
+    <div class="card">
+      <div class="card-title">⭐ Wellness Score</div>
+      <div class="wellness-score">
+        <div class="score-ring" id="scoreRing"><div class="score-inner" id="scoreNum">—</div></div>
+        <div class="score-label" id="scoreLabel">Log more to calculate</div>
+      </div>
+    </div>
+
+    <!-- STREAK + BADGES -->
+    <div class="card full-width">
+      <div class="card-title">🔥 Streak & Achievements</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:start;">
+        <div style="text-align:center;background:linear-gradient(135deg,#f9eded,#ede9f5);border-radius:16px;padding:1.2rem 1.5rem;">
+          <div style="font-size:2.5rem;" id="streakEmoji">🔥</div>
+          <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--rose-deep);" id="streakCount">0</div>
+          <div style="font-size:0.75rem;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.06em;">Day Streak</div>
+          <div style="font-size:0.72rem;color:var(--text-soft);margin-top:0.3rem;" id="streakMsg"></div>
+        </div>
+        <div>
+          <div style="font-size:0.78rem;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.8rem;">Badges Earned</div>
+          <div id="badgesList" style="display:flex;flex-wrap:wrap;gap:0.5rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOOD CHART -->
+    <div class="card">
+      <div class="card-title">🌈 Mood Breakdown</div>
+      <div class="mood-chart" id="moodChart"></div>
+    </div>
+
+    <!-- MOOD TREND -->
+    <div class="card">
+      <div class="card-title">
+        📈 Mood Trend
+        <span style="float:right;display:flex;gap:0.5rem;">
+          <button class="trend-btn active" onclick="setTrendView('week')">Week</button>
+          <button class="trend-btn" onclick="setTrendView('month')">Month</button>
+        </span>
+      </div>
+      <div id="trendChart" style="display:flex;gap:4px;align-items:flex-end;height:80px;margin-top:0.5rem;"></div>
+      <div id="trendLabels" style="display:flex;gap:4px;margin-top:4px;"></div>
+    </div>
+
+    <!-- SYMPTOM + CYCLE -->
+    <div class="card">
+      <div class="card-title">🔬 Symptom Patterns</div>
+      <div id="symptomAnalysis" class="empty-state">Log more entries to see patterns 🌿</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔮 Cycle & Ovulation</div>
+      <div id="cyclePrediction" class="empty-state">Go to the Tracker tab to log your period dates 🌸</div>
+    </div>
+
+    <!-- PMS ALERT -->
+    <div id="pmsAlert"></div>
+
+    <!-- CORRELATION -->
+    <div class="card full-width">
+      <div class="card-title">🧠 Mood Correlation — Does Sleep Affect Your Mood?</div>
+      <div id="correlationBox" class="empty-state">Log more entries with sleep data 🌿</div>
+    </div>
+
+    <!-- STRESS TRIGGER -->
+    <div class="card full-width">
+      <div class="card-title">😤 Stress Trigger Analysis</div>
+      <div id="stressTrigger" class="empty-state">Log more entries to see stress patterns 🌿</div>
+    </div>
+
+    <!-- SLEEP RECOMMENDATION -->
+    <div class="card">
+      <div class="card-title">😴 Sleep Recommendation</div>
+      <div id="sleepRec" class="empty-state">Log more entries 🌙</div>
+    </div>
+
+    <!-- WEEKLY REPORT CARD -->
+    <div class="card">
+      <div class="card-title">📊 Weekly Report Card</div>
+      <div id="weeklyReport" class="empty-state">Log at least 3 days this week 📊</div>
+    </div>
+
+    <!-- HEALTH TIPS -->
+    <div class="card full-width">
+      <div class="card-title">💚 Health Tips for You</div>
+      <div id="healthTips" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.8rem;margin-top:0.5rem;"></div>
+    </div>
+
+    <!-- PAST LOGS -->
+    <div class="card full-width">
+      <div class="card-title">📖 Past Entries</div>
+      <div class="log-list" id="logList">
+        <div class="empty-state">No entries yet. Start logging 🌿</div>
+      </div>
+    </div>
+  </main>
+  </div>
+
+  <!-- DIARY TAB -->
+  <div class="tab-page" id="tab-diary">
+    <div style="max-width:700px;margin:0 auto;padding:1.5rem;">
+      <div style="background:var(--card-bg);border-radius:20px;padding:1.8rem;box-shadow:var(--shadow);border:1px solid rgba(232,160,160,0.15);margin-bottom:1.5rem;">
+        <div class="card-title">📝 Write a Diary Entry</div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="diaryDate"/>
+        </div>
+        <div class="form-group">
+          <label>Title (optional)</label>
+          <input type="text" id="diaryTitle" placeholder="Give your entry a title..." style="width:100%;padding:0.65rem 0.9rem;border:1.5px solid rgba(200,120,120,0.2);border-radius:10px;font-family:DM Sans,sans-serif;font-size:0.9rem;color:var(--text);background:rgba(255,255,255,0.8);outline:none;"/>
+        </div>
+        <div class="form-group">
+          <label>Mood</label>
+          <div class="pill-group" id="diaryMoodGroup">
+            <button class="pill diary-mood" data-val="Happy">😊 Happy</button>
+            <button class="pill diary-mood" data-val="Sad">😢 Sad</button>
+            <button class="pill diary-mood" data-val="Anxious">😰 Anxious</button>
+            <button class="pill diary-mood" data-val="Irritable">😤 Irritable</button>
+            <button class="pill diary-mood" data-val="Calm">😌 Calm</button>
+            <button class="pill diary-mood" data-val="Tired">😴 Tired</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Entry</label>
+          <textarea id="diaryContent" placeholder="Dear diary..." style="min-height:150px;"></textarea>
+        </div>
+        <button class="btn-submit" onclick="saveDiaryEntry()">Save Entry 📝</button>
+      </div>
+
+      <div style="background:var(--card-bg);border-radius:20px;padding:1.8rem;box-shadow:var(--shadow);border:1px solid rgba(232,160,160,0.15);">
+        <div class="card-title">📖 Past Entries</div>
+        <div style="margin-bottom:1rem;">
+          <input type="text" id="diarySearch" placeholder="Search entries..." oninput="filterDiary()" style="width:100%;padding:0.65rem 0.9rem;border:1.5px solid rgba(200,120,120,0.2);border-radius:10px;font-family:DM Sans,sans-serif;font-size:0.9rem;color:var(--text);background:rgba(255,255,255,0.8);outline:none;"/>
+        </div>
+        <div id="diaryList" class="log-list" style="max-height:500px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACKER TAB -->
+  <div class="tab-page" id="tab-tracker">
+    <div style="max-width:700px;margin:0 auto;padding:1.5rem;">
+      <div style="background:var(--card-bg);border-radius:20px;padding:1.8rem;box-shadow:var(--shadow);border:1px solid rgba(232,160,160,0.15);margin-bottom:1.5rem;">
+        <div class="card-title">🩸 Period Tracker</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;">
+          <div>
+            <label>Period Start Date</label>
+            <input type="date" id="trackerPeriodStart"/>
+          </div>
+          <div>
+            <label>Period End Date</label>
+            <input type="date" id="trackerPeriodEnd"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Flow Level</label>
+          <div class="pill-group" id="flowGroup">
+            <button class="pill flow" data-val="Light">🩸 Light</button>
+            <button class="pill flow" data-val="Medium">🩸🩸 Medium</button>
+            <button class="pill flow" data-val="Heavy">🩸🩸🩸 Heavy</button>
+          </div>
+        </div>
+        <button class="btn-submit" onclick="saveTrackerPeriod()">Save Period 🌸</button>
+      </div>
+
+      <div style="background:var(--card-bg);border-radius:20px;padding:1.8rem;box-shadow:var(--shadow);border:1px solid rgba(232,160,160,0.15);">
+        <div class="card-title">🔮 Cycle & Ovulation Prediction</div>
+        <div id="trackerCyclePrediction" class="empty-state">Log at least 2 periods to predict 🌙</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8080';
+  let logs = [], selectedMood = '', selectedEnergy = '', selectedSymptoms = [], waterCount = 0, trendView = 'week';
+  let currentUser = null;
+
+  const quotes = [
+    "Your body is not a problem to be solved. 🌸",
+    "Rest is also a form of productivity. 💜",
+    "You are allowed to be both a masterpiece and a work in progress. 🌿",
+    "Taking care of yourself is an act of revolution. 💛",
+    "Your feelings are valid. Every single one. 🌙",
+    "Healing is not linear. Be patient with yourself. 🍃",
+    "You don't have to earn rest. 💙",
+    "Small steps still move you forward. 🌸"
+  ];
+
+  const encouragements = {
+    Happy:    ["You're radiating good energy! 🌸","Happiness looks good on you 💛","Your smile is your superpower 🌟","Good days are worth celebrating 🎉"],
+    Sad:      ["It's okay to not be okay 💜","This too shall pass 🌙","You are loved 💙","Hard days don't last forever 🌿"],
+    Anxious:  ["Take a deep breath 💛","One step at a time 🍃","Your feelings are valid 💜","You've handled hard things before 🌸"],
+    Irritable:["Totally valid 💙","Rest and hydrate 🌿","Set boundaries when needed 🌸","Rest is productive too 💜"],
+    Calm:     ["This energy suits you 🌿","Calm is a superpower 🍃","Love this grounded version of you 💛","You're exactly where you need to be 🌸"],
+    Tired:    ["Rest is not laziness 💤","Listen to your body 🌙","You're still doing your best 💜","Tomorrow is a new day 🌿"]
+  };
+
+  // AUTH
+  let authMode = 'login';
+
+  function switchTab(mode) {
+    authMode = mode;
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&mode==='login')||(i===1&&mode==='signup')));
+    document.querySelector('.auth-btn').textContent = mode === 'login' ? 'Login' : 'Create Account';
+    document.getElementById('authError').textContent = '';
+  }
+
+  async function handleAuth() {
+    const username = document.getElementById('authUsername').value.trim();
+    const password = document.getElementById('authPassword').value.trim();
+    if (!username || !password) { document.getElementById('authError').textContent = 'Please fill in both fields'; return; }
+    try {
+      const res = await fetch(API + '/' + authMode, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({username, password})
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        currentUser = {id: data.userId, username: data.username || username};
+        if (authMode === 'signup') {
+          // after signup auto login
+          const loginRes = await fetch(API + '/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username, password}) });
+          const loginData = await loginRes.json();
+          currentUser = {id: loginData.userId, username};
+        }
+        showDashboard();
+      } else {
+        document.getElementById('authError').textContent = data.message || 'Something went wrong';
+      }
+    } catch(e) { document.getElementById('authError').textContent = 'Cannot connect to server. Is Java running?'; }
+  }
+
+  function showDashboard() {
+    document.getElementById('authPage').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('welcomeText').textContent = 'Hi, ' + currentUser.username + ' 🌸';
+    document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    document.getElementById('quoteBanner').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+    document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+    updateSleep(7); updateStress(5); buildWaterGlasses();
+    document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
+    loadLogs();
+    loadPeriodHistory();
+  }
+
+  function logout() {
+    currentUser = null; logs = [];
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('authPage').style.display = 'flex';
+    document.getElementById('authUsername').value = '';
+    document.getElementById('authPassword').value = '';
+    document.getElementById('authError').textContent = '';
+  }
+
+  // DARK MODE
+  function toggleDark() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.querySelector('.dark-toggle').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+  }
+
+  // WATER
+  function getWaterTaunt(g) {
+    if (g===0) return "Not a single drop? Are you a cactus? 🌵";
+    if (g<=2) return "That's it? Your kidneys are filing a complaint 😤";
+    if (g<=4) return "Getting there... your cells are cautiously optimistic 💧";
+    if (g<=6) return "Now we're talking! Your skin is thriving 🌸";
+    if (g===7) return "Almost perfect! One more and you're a hydration hero 💪";
+    if (g===8) return "Hydration queen! Your body thanks you 👑";
+    if (g<=10) return "Okay overachiever, the toilet called 🚽";
+    if (g<=12) return "Are you part fish? 🐳";
+    return "Please stop. Water toxicity is real. SIT DOWN 💀";
+  }
+
+  function buildWaterGlasses() {
+    const container = document.getElementById('waterGlasses');
+    container.innerHTML = '';
+    for (let i=1;i<=13;i++) {
+      const g = document.createElement('span');
+      g.className = 'glass'+(i<=waterCount?' filled':'');
+      g.textContent = '💧';
+      g.onclick = () => { waterCount=i; buildWaterGlasses(); document.getElementById('waterCount').textContent=waterCount; document.getElementById('waterTaunt').textContent=getWaterTaunt(waterCount); };
+      container.appendChild(g);
+    }
+  }
+
+  function updateSleep(val) {
+    document.getElementById('sleepVal').textContent = val+'h';
+    const h = parseFloat(val);
+    let t = '';
+    if(h<4) t="Running on fumes? Bold strategy 🧟";
+    else if(h<5) t="Your eye bags have eye bags 👁️";
+    else if(h<6) t="Your pillow misses you 🛏️";
+    else if(h<7) t="Getting warmer... almost there 😴";
+    else if(h<=8) t="Look at you sleeping like a responsible adult 👏";
+    else if(h<=9) t="Well rested! Growth is happening 🌱";
+    else t="Are you hibernating? Bears called 🐻";
+    document.getElementById('sleepTaunt').textContent = t;
+  }
+
+  function updateStress(val) {
+    document.getElementById('stressVal').textContent = val;
+    const s = parseInt(val);
+    const extras = ["Take a breath. One thing at a time 💙","You've survived worse days 💪","Pause. Reset. Continue 🔄","This is temporary 🌙","You're still in control 💪"];
+    const extra = extras[Math.floor(Math.random()*extras.length)];
+    let t = '';
+    if(s<=2) t="Zen master! Teach us your ways 🧘";
+    else if(s<=4) t="Chill vibes only 😎";
+    else if(s===5) t="Perfectly balanced 🌿";
+    else if(s<=7) t="Okay bestie, breathe 😬";
+    else if(s===8) t="One email away from snapping 💀";
+    else if(s===9) t="Your cortisol is doing overtime 😰";
+    else t="10/10?! Go touch some grass RIGHT NOW 🌱";
+    document.getElementById('stressTaunt').textContent = t + ' | ' + extra;
+  }
+
+  // PILLS
+  document.querySelectorAll('.pill.mood').forEach(p=>p.addEventListener('click',()=>{
+    document.querySelectorAll('.pill.mood').forEach(x=>x.classList.remove('selected'));
+    p.classList.add('selected'); selectedMood=p.dataset.val; showEncouragement(selectedMood);
+  }));
+  document.querySelectorAll('.pill.energy').forEach(p=>p.addEventListener('click',()=>{
+    document.querySelectorAll('.pill.energy').forEach(x=>x.classList.remove('selected'));
+    p.classList.add('selected'); selectedEnergy=p.dataset.val;
+  }));
+  document.querySelectorAll('.pill.symptom').forEach(p=>p.addEventListener('click',()=>{
+    if(p.dataset.val==='None'){document.querySelectorAll('.pill.symptom').forEach(x=>x.classList.remove('selected'));p.classList.add('selected');selectedSymptoms=['None'];}
+    else{document.querySelector('.pill.symptom[data-val="None"]')?.classList.remove('selected');p.classList.toggle('selected');selectedSymptoms=Array.from(document.querySelectorAll('.pill.symptom.selected')).map(x=>x.dataset.val);}
+  }));
+
+  function showEncouragement(mood) {
+    const box = document.getElementById('encouragementBox');
+    const arr = encouragements[mood]||["You are doing better than you think 💪"];
+    box.textContent = arr[Math.floor(Math.random()*arr.length)];
+    box.classList.remove('hidden');
+  }
+
+  // SUBMIT
+  async function submitLog() {
+    const date = document.getElementById('logDate').value;
+    const notes = document.getElementById('notes').value;
+    const sleep = parseFloat(document.getElementById('sleepSlider').value);
+    const stress = parseInt(document.getElementById('stressSlider').value);
+    if(!date||!selectedMood||!selectedEnergy){showToast('Please fill in date, mood and energy 🌸','#c97b7b');return;}
+    try {
+      await fetch(API+'/log',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({userId:currentUser.id,date,mood:selectedMood,energy:selectedEnergy,symptoms:selectedSymptoms.join(', '),notes,waterIntake:waterCount,sleepHours:sleep,stressLevel:stress})});
+      showToast('Entry saved! 🌸');
+      resetForm(); await loadLogs();
+    } catch(e){showToast('Could not connect to server','#c97b7b');}
+  }
+
+  function resetForm() {
+    document.getElementById('notes').value='';
+    document.getElementById('logDate').value=new Date().toISOString().split('T')[0];
+    document.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
+    document.getElementById('encouragementBox').classList.add('hidden');
+    selectedMood='';selectedEnergy='';selectedSymptoms=[];
+    waterCount=0;buildWaterGlasses();
+    document.getElementById('waterCount').textContent=0;
+    document.getElementById('waterTaunt').textContent='';
+    document.getElementById('sleepSlider').value=7;updateSleep(7);
+    document.getElementById('stressSlider').value=5;updateStress(5);
+  }
+
+  async function loadLogs() {
+    try{const res=await fetch(API+'/logs?userId='+currentUser.id);logs=await res.json();renderAll();}
+    catch(e){console.log('Could not load logs');}
+  }
+
+  function renderAll(){renderLogs();renderStats();renderChart();renderTrend();renderSymptomAnalysis();renderCyclePrediction();renderHealthTips();renderWellnessScore();renderCorrelation();renderStreakAndBadges();renderHealthInsights();}
+
+  function renderLogs() {
+    const list=document.getElementById('logList');
+    if(!logs.length){list.innerHTML='<div class="empty-state">No entries yet 🌿</div>';return;}
+    list.innerHTML=logs.map(l=>`
+      <div class="log-item">
+        <div class="log-date">${l.logDate}</div>
+        <div><span class="log-mood-badge">${moodEmoji(l.mood)} ${l.mood}</span> · ${l.energyLevel} energy${l.symptoms?' · '+l.symptoms:''}</div>
+        <div class="log-extras">💧 ${l.waterIntake} glasses · 😴 ${l.sleepHours}h · 😰 Stress ${l.stressLevel}/10</div>
+        ${l.notes?`<div class="log-notes">${l.notes}</div>`:''}
+        <div class="log-encouragement">"${l.encouragement}"</div>
+      </div>`).join('');
+  }
+
+  function renderStats() {
+    const m=logs.filter(l=>l.logDate?.startsWith(new Date().toISOString().slice(0,7)));
+    document.getElementById('statTotal').textContent=m.length;
+    const mc={};m.forEach(l=>mc[l.mood]=(mc[l.mood]||0)+1);
+    const top=Object.entries(mc).sort((a,b)=>b[1]-a[1])[0];
+    document.getElementById('statMood').textContent=top?moodEmoji(top[0]):'—';
+    const em={High:3,Medium:2,Low:1};
+    const avg=m.length?m.reduce((s,l)=>s+(em[l.energyLevel]||2),0)/m.length:0;
+    document.getElementById('statEnergy').textContent=avg>=2.5?'⚡':avg>=1.5?'🔋':avg>0?'🪫':'—';
+  }
+
+  function renderChart() {
+    const moods=['Happy','Calm','Sad','Anxious','Irritable','Tired'];
+    const colors=['#e8a0a0','#a8c4a2','#c4b4d4','#f5c6a0','#c4a4a4','#b4b4c4'];
+    const count={};moods.forEach(m=>count[m]=0);
+    logs.forEach(l=>{if(count[l.mood]!==undefined)count[l.mood]++;});
+    const max=Math.max(...Object.values(count),1);
+    document.getElementById('moodChart').innerHTML=moods.map((m,i)=>
+      `<div class="mood-bar-wrap"><div class="mood-bar" style="height:${Math.max(4,(count[m]/max)*72)}px;background:${colors[i]};"></div><div class="mood-bar-label">${moodEmoji(m)}</div></div>`).join('');
+  }
+
+  function setTrendView(v){trendView=v;document.querySelectorAll('.trend-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===v));renderTrend();}
+
+  function renderTrend() {
+    const moodScore={Happy:5,Calm:4,Tired:3,Anxious:2,Irritable:2,Sad:1};
+    const moodColor={Happy:'#e8a0a0',Calm:'#a8c4a2',Tired:'#b4b4c4',Anxious:'#f5c6a0',Irritable:'#c4a4a4',Sad:'#c4b4d4'};
+    const today=new Date();const count=trendView==='week'?7:30;const days=[];
+    for(let i=count-1;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);const key=d.toISOString().split('T')[0];const log=logs.find(l=>l.logDate===key);days.push({label:trendView==='week'?d.toLocaleDateString('en',{weekday:'short'}):d.getDate(),log});}
+    document.getElementById('trendChart').innerHTML=days.map(d=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;"><div style="width:100%;border-radius:6px 6px 0 0;height:${d.log?Math.max(8,(moodScore[d.log.mood]||3)/5*72):4}px;background:${d.log?(moodColor[d.log.mood]||'#e8a0a0'):'#f0e8e8'};transition:height 0.4s;"></div></div>`).join('');
+    document.getElementById('trendLabels').innerHTML=days.map(d=>`<div style="flex:1;text-align:center;font-size:0.6rem;color:var(--text-soft);">${d.label}</div>`).join('');
+  }
+
+  function renderSymptomAnalysis() {
+    const count={};
+    logs.forEach(l=>{if(l.symptoms)l.symptoms.split(',').map(s=>s.trim()).filter(s=>s&&s!=='None').forEach(s=>count[s]=(count[s]||0)+1);});
+    const sorted=Object.entries(count).sort((a,b)=>b[1]-a[1]);
+    const el=document.getElementById('symptomAnalysis');
+    if(!sorted.length){el.innerHTML='<div class="empty-state">Log more entries to see patterns 🌿</div>';return;}
+    el.innerHTML=sorted.map(([s,c])=>`<span class="symptom-tag">${s} <strong>${c}x</strong></span>`).join('');
+  }
+
+  // LOG PERIOD
+  async function logPeriod() {
+    const start = document.getElementById('periodStart').value;
+    const end = document.getElementById('periodEnd').value;
+    if (!start || !end) { showToast('Please select both start and end dates 🌸', '#c97b7b'); return; }
+    if (new Date(end) < new Date(start)) { showToast('End date cannot be before start date 🌸', '#c97b7b'); return; }
+    try {
+      await fetch(API + '/period', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({userId: currentUser.id, startDate: start, endDate: end})
+      });
+      showToast('Period dates saved! 🌸');
+      document.getElementById('periodStart').value = '';
+      document.getElementById('periodEnd').value = '';
+      await loadPeriodHistory();
+    } catch(e) { showToast('Could not save period dates', '#c97b7b'); }
+  }
+
+  let periodHistory = [];
+
+  async function loadPeriodHistory() {
+    try {
+      const res = await fetch(API + '/periods?userId=' + currentUser.id);
+      periodHistory = await res.json();
+      renderCyclePrediction();
+    } catch(e) { console.log('Could not load period history'); }
+  }
+
+  function renderCyclePrediction() {
+    const el = document.getElementById('cyclePrediction');
+    if (!periodHistory || periodHistory.length < 1) {
+      el.innerHTML = '<div class="empty-state">Log at least 2 periods to predict 🌙</div>'; return;
+    }
+
+    // Use actual period start dates
+    const lastPeriod = periodHistory[0]; // most recent
+    const lastStart = new Date(lastPeriod[0]);
+    const lastEnd = new Date(lastPeriod[1]);
+    const periodDays = Math.round((lastEnd - lastStart)/(1000*60*60*24)) + 1;
+
+    // Calculate average cycle from history
+    let avgCycle = 28; // default
+    if (periodHistory.length >= 2) {
+      const gaps = [];
+      for (let i = 0; i < periodHistory.length - 1; i++) {
+        const diff = (new Date(periodHistory[i][0]) - new Date(periodHistory[i+1][0]))/(1000*60*60*24);
+        if (diff > 0) gaps.push(diff);
+      }
+      if (gaps.length > 0) avgCycle = Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length);
+    }
+
+    const nextCycle = new Date(lastStart); nextCycle.setDate(lastStart.getDate() + avgCycle);
+    const ovulationPeak = new Date(lastStart); ovulationPeak.setDate(lastStart.getDate() + Math.round(avgCycle/2));
+    const ovulationStart = new Date(lastStart); ovulationStart.setDate(lastStart.getDate() + Math.round(avgCycle/2) - 4);
+    const ovulationEnd = new Date(lastStart); ovulationEnd.setDate(lastStart.getDate() + Math.round(avgCycle/2) + 2);
+
+    const today = new Date();
+    const daysToNext = Math.round((nextCycle - today)/(1000*60*60*24));
+    const daysToPeak = Math.round((ovulationPeak - today)/(1000*60*60*24));
+    const daysToStart = Math.round((ovulationStart - today)/(1000*60*60*24));
+    const daysToEnd = Math.round((ovulationEnd - today)/(1000*60*60*24));
+
+    let ovulationStatus = '';
+    if (daysToEnd < 0) ovulationStatus = `<span style="color:var(--text-soft);">Fertile window passed this cycle 🌸</span>`;
+    else if (daysToStart <= 0 && daysToEnd >= 0) ovulationStatus = `<span style="color:#e8a0a0;font-weight:500;">🔴 You are in your fertile window right now!</span>`;
+    else ovulationStatus = `Fertile window starts in <strong>${daysToStart} days</strong> (${ovulationStart.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} – ${ovulationEnd.toLocaleDateString('en-IN',{day:'numeric',month:'short'})})`;
+
+    // Period history list
+    const historyHtml = periodHistory.slice(0,3).map(p => {
+      const s = new Date(p[0]); const e = new Date(p[1]);
+      const dur = Math.round((e-s)/(1000*60*60*24))+1;
+      return `<div style="font-size:0.75rem;color:var(--text-soft);padding:0.3rem 0;border-bottom:1px solid rgba(200,120,120,0.1);">
+        📅 ${s.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} – ${e.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} <span style="color:var(--rose-deep);">(${dur} days)</span>
+        ${p[2]>0?`<span style="margin-left:0.5rem;color:var(--text-soft);">Cycle: ${p[2]} days</span>`:''}
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="predict-box">
+        <div class="predict-date">${nextCycle.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+        <div class="predict-label">Next period · ${daysToNext > 0 ? 'in '+daysToNext+' days' : daysToNext === 0 ? 'TODAY' : 'overdue by '+Math.abs(daysToNext)+' days'} · avg ${avgCycle}-day cycle</div>
+      </div>
+      <div style="background:rgba(168,196,162,0.15);border-radius:12px;padding:0.9rem 1rem;border-left:3px solid var(--sage);margin-top:0.8rem;">
+        <div style="font-size:0.82rem;font-weight:500;color:var(--text);margin-bottom:0.4rem;">🥚 Ovulation Prediction</div>
+        <div style="font-size:0.8rem;color:var(--text-soft);">Peak: <strong>${ovulationPeak.toLocaleDateString('en-IN',{day:'numeric',month:'long'})}</strong> (${daysToPeak>0?'in '+daysToPeak+' days':daysToPeak===0?'TODAY':Math.abs(daysToPeak)+' days ago'})</div>
+        <div style="font-size:0.78rem;color:var(--text-soft);margin-top:0.3rem;">Window: ${ovulationStart.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} – ${ovulationEnd.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+        <div style="font-size:0.8rem;margin-top:0.5rem;">${ovulationStatus}</div>
+      </div>
+      ${historyHtml ? `<div style="margin-top:0.8rem;"><div style="font-size:0.78rem;font-weight:500;color:var(--text-soft);margin-bottom:0.3rem;">Recent Periods</div>${historyHtml}</div>` : ''}
+      <div style="font-size:0.72rem;color:var(--text-soft);margin-top:0.6rem;font-style:italic;">⚠️ Estimate based on your logged period dates.</div>`;
+  }
+
+  function renderWellnessScore() {
+    const recent=logs.slice(0,7);if(!recent.length)return;
+    const moodScore={Happy:100,Calm:90,Tired:50,Anxious:40,Irritable:35,Sad:25};
+    const energyScore={High:100,Medium:60,Low:20};
+    let score=0;
+    recent.forEach(l=>{let s=(moodScore[l.mood]||50)*0.3+(energyScore[l.energyLevel]||50)*0.2;s+=Math.min(l.waterIntake/8*100,100)*0.2;s+=(l.sleepHours>=7&&l.sleepHours<=9?100:l.sleepHours>=6?70:40)*0.2;s+=(10-l.stressLevel)/9*100*0.1;score+=s;});
+    score=Math.round(score/recent.length);
+    const label=score>=80?'Thriving 🌸':score>=60?'Doing well 💛':score>=40?'Hang in there 💜':'Rest up 🌙';
+    document.getElementById('scoreNum').textContent=score;
+    document.getElementById('scoreLabel').textContent=label;
+    document.getElementById('scoreRing').style.background=`conic-gradient(var(--rose) ${score*3.6}deg, var(--blush) 0deg)`;
+  }
+
+  function renderCorrelation() {
+    const el=document.getElementById('correlationBox');
+    const withSleep=logs.filter(l=>l.sleepHours>0);
+    if(withSleep.length<3){el.innerHTML='<div class="empty-state">Log more entries with sleep data 🌿</div>';return;}
+    const moodScore={Happy:5,Calm:4,Tired:3,Anxious:2,Irritable:2,Sad:1};
+    const goodSleep=withSleep.filter(l=>l.sleepHours>=7);
+    const badSleep=withSleep.filter(l=>l.sleepHours<7);
+    const avgGood=goodSleep.length?goodSleep.reduce((s,l)=>s+(moodScore[l.mood]||3),0)/goodSleep.length:null;
+    const avgBad=badSleep.length?badSleep.reduce((s,l)=>s+(moodScore[l.mood]||3),0)/badSleep.length:null;
+    let html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">';
+    if(avgGood)html+=`<div class="tip-card"><div class="tip-title">😴 7+ hours sleep</div><div class="tip-body">Avg mood: <strong>${avgGood.toFixed(1)}/5</strong> — ${avgGood>=4?'You feel great when well rested! 🌸':'Mood is moderate even with good sleep.'}</div></div>`;
+    if(avgBad)html+=`<div class="tip-card" style="border-left-color:var(--rose);"><div class="tip-title">😵 Under 7 hours</div><div class="tip-body">Avg mood: <strong>${avgBad.toFixed(1)}/5</strong> — ${avgBad<3?'Sleep deprivation clearly affects your mood 💜':'Your mood holds up okay on less sleep.'}</div></div>`;
+    html+='</div>';
+    if(avgGood&&avgBad){const diff=avgGood-avgBad;html+=`<p style="margin-top:0.8rem;font-size:0.82rem;color:var(--text-soft);">${diff>0.5?'📊 Better sleep clearly improves your mood. Prioritize 7–8 hours! 🌙':diff<-0.5?'Interesting — you manage mood well regardless of sleep.':'📊 Sleep does not strongly affect your mood score yet.'}</p>`;}
+    el.innerHTML=html;
+  }
+
+  function renderHealthTips() {
+    const topMoods={};logs.slice(0,7).forEach(l=>topMoods[l.mood]=(topMoods[l.mood]||0)+1);
+    const mood=Object.entries(topMoods).sort((a,b)=>b[1]-a[1])[0]?.[0]||'general';
+    const tips={
+      Happy:[{t:'Keep Moving 🏃',b:'Your energy is high — a walk will feel amazing.'},{t:'Connect 💬',b:'Share your good mood with someone you love.'},{t:'Eat Well 🥗',b:'Nourish yourself with colourful fruits and vegetables.'}],
+      Sad:[{t:'Rest First 🛌',b:'Give yourself permission to do less today.'},{t:'Warm Drinks 🍵',b:'Chamomile tea can soothe your nervous system.'},{t:'Journal 📝',b:'Writing what you feel helps process emotions.'}],
+      Anxious:[{t:'Box Breathing 🌬',b:'Inhale 4s → hold 4s → exhale 4s → hold 4s.'},{t:'Limit Caffeine ☕',b:'Switch to herbal tea today.'},{t:'Grounding 🌿',b:'Name 5 things you see, 4 you touch, 3 you hear.'}],
+      Irritable:[{t:'Hydrate 💧',b:'Drink a glass of water right now.'},{t:'Magnesium Foods 🥜',b:'Nuts and dark chocolate reduce irritability.'},{t:'Take Space 🚶',b:'Step away from overwhelming situations.'}],
+      Calm:[{t:'Build on This 🌱',b:'Use this calm energy for something creative.'},{t:'Mindful Eating 🍽',b:'Eat slowly and without screens.'},{t:'Stretch 🧘',b:'A 10-minute stretch deepens this peace.'}],
+      Tired:[{t:'Sleep Hygiene 🌙',b:'Sleep and wake at the same time every day.'},{t:'Iron-Rich Foods 🥩',b:'Try spinach, lentils or lean meat.'},{t:'Short Nap 😴',b:'A 20-min nap between 1–3pm restores energy.'}],
+      general:[{t:'Stay Consistent 📅',b:'Logging daily helps spot patterns.'},{t:'Move Your Body 🤸',b:'15 minutes of movement improves mood.'},{t:'Self-Compassion 💜',b:'You are doing your best. That is always enough.'}]
+    };
+    const selected=tips[mood]||tips.general;
+    document.getElementById('healthTips').innerHTML=selected.map(t=>`<div class="tip-card"><div class="tip-title">${t.t}</div><div class="tip-body">${t.b}</div></div>`).join('');
+  }
+
+  // STREAK & BADGES
+  function renderStreakAndBadges() {
+    // Calculate streak
+    const today = new Date();
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today); d.setDate(today.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      if (logs.find(l => l.logDate === key)) streak++;
+      else if (i > 0) break;
+    }
+
+    // Streak display
+    const streakEmoji = streak >= 30 ? '🏆' : streak >= 14 ? '⚡' : streak >= 7 ? '🔥' : streak >= 3 ? '✨' : '💧';
+    const streakMsg = streak >= 30 ? 'Legendary! 🏆' : streak >= 14 ? 'On fire! Keep going!' : streak >= 7 ? 'One week strong!' : streak >= 3 ? 'Building momentum!' : streak >= 1 ? 'Great start!' : 'Log today to start!';
+    document.getElementById('streakCount').textContent = streak;
+    document.getElementById('streakEmoji').textContent = streakEmoji;
+    document.getElementById('streakMsg').textContent = streakMsg;
+
+    // Badges
+    const allBadges = [
+      { emoji:'🌱', name:'First Log', desc:'Logged your first entry', earned: logs.length >= 1 },
+      { emoji:'🔥', name:'3 Day Streak', desc:'Logged 3 days in a row', earned: streak >= 3 },
+      { emoji:'⚡', name:'Week Warrior', desc:'Logged 7 days in a row', earned: streak >= 7 },
+      { emoji:'🏆', name:'Month Master', desc:'Logged 30 days in a row', earned: streak >= 30 },
+      { emoji:'💧', name:'Hydration Queen', desc:'Logged 8+ glasses of water', earned: logs.some(l => l.waterIntake >= 8) },
+      { emoji:'😴', name:'Sleep Star', desc:'Logged 8 hours of sleep', earned: logs.some(l => l.sleepHours >= 8) },
+      { emoji:'🧘', name:'Zen Master', desc:'Logged stress level 1 or 2', earned: logs.some(l => l.stressLevel <= 2) },
+      { emoji:'😊', name:'Happy Streak', desc:'Logged Happy mood 5 times', earned: logs.filter(l=>l.mood==='Happy').length >= 5 },
+      { emoji:'🌿', name:'Wellness Warrior', desc:'Logged 10+ entries', earned: logs.length >= 10 },
+      { emoji:'🌸', name:'Bloom Pro', desc:'Logged 30+ entries', earned: logs.length >= 30 },
+    ];
+
+    document.getElementById('badgesList').innerHTML = allBadges.map(b =>
+      `<div class="badge ${b.earned?'':'locked'}" title="${b.desc}">${b.emoji} ${b.name}</div>`
+    ).join('');
+  }
+
+  // HEALTH INSIGHTS
+  function renderHealthInsights() {
+    renderPMSAlert();
+    renderStressTrigger();
+    renderSleepRecommendation();
+    renderWeeklyReportCard();
+  }
+
+  function renderPMSAlert() {
+    const el = document.getElementById('pmsAlert');
+    if (!el || !periodHistory || periodHistory.length < 1) return;
+    const lastStart = new Date(periodHistory[0][0]);
+    let avgCycle = 28;
+    if (periodHistory.length >= 2) {
+      const gaps = [];
+      for (let i = 0; i < periodHistory.length - 1; i++) {
+        const diff = (new Date(periodHistory[i][0]) - new Date(periodHistory[i+1][0]))/(1000*60*60*24);
+        if (diff > 0) gaps.push(diff);
+      }
+      if (gaps.length > 0) avgCycle = Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length);
+    }
+    const nextPeriod = new Date(lastStart); nextPeriod.setDate(lastStart.getDate() + avgCycle);
+    const daysToNext = Math.round((nextPeriod - new Date())/(1000*60*60*24));
+    if (daysToNext >= 0 && daysToNext <= 5) {
+      el.innerHTML = `<div class="pms-alert">🩸 <strong>PMS Alert!</strong> Your period is predicted in ${daysToNext} days. Stock up on comfort food, heating pad, and be extra gentle with yourself 💜</div>`;
+    } else {
+      el.innerHTML = '';
+    }
+  }
+
+  function renderStressTrigger() {
+    const el = document.getElementById('stressTrigger');
+    if (!el || logs.length < 3) return;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const dayStress = {};
+    logs.forEach(l => {
+      const day = days[new Date(l.logDate).getDay()];
+      if (!dayStress[day]) dayStress[day] = [];
+      dayStress[day].push(l.stressLevel);
+    });
+    const avgByDay = Object.entries(dayStress).map(([day, levels]) => ({
+      day, avg: levels.reduce((a,b)=>a+b,0)/levels.length
+    })).sort((a,b)=>b.avg-a.avg);
+    if (avgByDay.length < 2) return;
+    const worst = avgByDay[0];
+    const best = avgByDay[avgByDay.length-1];
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+        <div class="tip-card" style="border-left-color:var(--rose);">
+          <div class="tip-title">😤 Most Stressful Day</div>
+          <div class="tip-body"><strong>${worst.day}</strong> — avg stress ${worst.avg.toFixed(1)}/10. Try to plan lighter tasks on this day.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-title">😌 Most Peaceful Day</div>
+          <div class="tip-body"><strong>${best.day}</strong> — avg stress ${best.avg.toFixed(1)}/10. This is your recharge day!</div>
+        </div>
+      </div>`;
+  }
+
+  function renderSleepRecommendation() {
+    const el = document.getElementById('sleepRec');
+    if (!el) return;
+    const withSleep = logs.filter(l => l.sleepHours > 0);
+    if (withSleep.length < 3) { el.innerHTML = '<div class="empty-state">Log more entries to get sleep recommendations 🌙</div>'; return; }
+    const moodScore = {Happy:5,Calm:4,Tired:3,Anxious:2,Irritable:2,Sad:1};
+    const sleepGroups = { low: [], mid: [], high: [] };
+    withSleep.forEach(l => {
+      if (l.sleepHours < 6) sleepGroups.low.push(moodScore[l.mood]||3);
+      else if (l.sleepHours <= 8) sleepGroups.mid.push(moodScore[l.mood]||3);
+      else sleepGroups.high.push(moodScore[l.mood]||3);
+    });
+    const avg = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1) : null;
+    const bestGroup = [
+      { label: 'Under 6 hours', avg: avg(sleepGroups.low) },
+      { label: '6–8 hours', avg: avg(sleepGroups.mid) },
+      { label: '8+ hours', avg: avg(sleepGroups.high) }
+    ].filter(g => g.avg).sort((a,b) => b.avg - a.avg)[0];
+    el.innerHTML = `<div class="tip-card"><div class="tip-title">😴 Your Best Sleep Range</div><div class="tip-body"><strong>${bestGroup.label}</strong> gives you the best mood score of <strong>${bestGroup.avg}/5</strong>. Try to stick to this range!</div></div>`;
+  }
+
+  function renderWeeklyReportCard() {
+    const el = document.getElementById('weeklyReport');
+    if (!el) return;
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+    const weekLogs = logs.filter(l => new Date(l.logDate) >= weekAgo);
+    if (weekLogs.length < 3) { el.innerHTML = '<div class="empty-state">Log at least 3 days this week for a report card 📊</div>'; return; }
+    const moodScore = {Happy:100,Calm:90,Tired:50,Anxious:40,Irritable:35,Sad:25};
+    const energyScore = {High:100,Medium:60,Low:20};
+    let score = 0;
+    weekLogs.forEach(l => {
+      let s = (moodScore[l.mood]||50)*0.3 + (energyScore[l.energyLevel]||50)*0.2;
+      s += Math.min(l.waterIntake/8*100,100)*0.2;
+      s += (l.sleepHours>=7&&l.sleepHours<=9?100:l.sleepHours>=6?70:40)*0.2;
+      s += (10-l.stressLevel)/9*100*0.1;
+      score += s;
+    });
+    score = Math.round(score/weekLogs.length);
+    const grade = score>=90?'A+':score>=80?'A':score>=70?'B+':score>=60?'B':score>=50?'C+':'C';
+    const gradeColor = score>=80?'#7a9e74':score>=60?'#e8a0a0':'#c97b7b';
+    const msg = score>=80?'Outstanding week! You took great care of yourself 🌸':score>=60?'Good week! A few more healthy habits and you will be thriving 💛':'Rough week. Be gentle with yourself — next week is a fresh start 💜';
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div style="text-align:center;background:linear-gradient(135deg,#f9eded,#ede9f5);border-radius:16px;padding:1rem 1.5rem;min-width:80px;">
+          <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:${gradeColor};font-weight:600;">${grade}</div>
+          <div style="font-size:0.72rem;color:var(--text-soft);">This Week</div>
+        </div>
+        <div>
+          <div style="font-size:0.85rem;color:var(--text);font-weight:500;margin-bottom:0.3rem;">${msg}</div>
+          <div style="font-size:0.78rem;color:var(--text-soft);">Based on ${weekLogs.length} logs · Score: ${score}/100</div>
+        </div>
+      </div>`;
+  }
+
+  // TAB SWITCHING
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    document.querySelectorAll('.nav-tab').forEach(b => { if(b.textContent.toLowerCase()===tab) b.classList.add('active'); });
+    if(tab==='diary') loadDiaryEntries();
+    if(tab==='tracker') renderTrackerCycle();
+  }
+
+  // DIARY
+  let diaryEntries = [], selectedDiaryMood = '';
+
+  document.querySelectorAll('.pill.diary-mood').forEach(p => p.addEventListener('click', () => {
+    document.querySelectorAll('.pill.diary-mood').forEach(x => x.classList.remove('selected'));
+    p.classList.add('selected'); selectedDiaryMood = p.dataset.val;
+  }));
+
+  document.querySelectorAll('.pill.flow').forEach(p => p.addEventListener('click', () => {
+    document.querySelectorAll('.pill.flow').forEach(x => x.classList.remove('selected'));
+    p.classList.add('selected');
+  }));
+
+  async function saveDiaryEntry() {
+    const date = document.getElementById('diaryDate').value;
+    const title = document.getElementById('diaryTitle').value;
+    const content = document.getElementById('diaryContent').value;
+    if (!date || !content) { showToast('Please fill in date and entry 📝', '#c97b7b'); return; }
+    try {
+      await fetch(API + '/diary', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({userId: currentUser.id, entryDate: date, title, content, mood: selectedDiaryMood})
+      });
+      showToast('Diary entry saved! 📝');
+      document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('diaryTitle').value = '';
+      document.getElementById('diaryContent').value = '';
+      document.querySelectorAll('.pill.diary-mood').forEach(x => x.classList.remove('selected'));
+      selectedDiaryMood = '';
+      await loadDiaryEntries();
+    } catch(e) { showToast('Could not save entry', '#c97b7b'); }
+  }
+
+  async function loadDiaryEntries() {
+    try {
+      const res = await fetch(API + '/diary?userId=' + currentUser.id);
+      diaryEntries = await res.json();
+      renderDiaryList(diaryEntries);
+    } catch(e) { console.log('Could not load diary'); }
+  }
+
+  function filterDiary() {
+    const q = document.getElementById('diarySearch').value.toLowerCase();
+    const filtered = diaryEntries.filter(e => (e[2]||'').toLowerCase().includes(q) || (e[3]||'').toLowerCase().includes(q));
+    renderDiaryList(filtered);
+  }
+
+  function renderDiaryList(entries) {
+    const list = document.getElementById('diaryList');
+    if (!entries.length) { list.innerHTML = '<div class="empty-state">No entries yet. Start writing 📝</div>'; return; }
+    list.innerHTML = entries.map(e => `
+      <div class="log-item" style="position:relative;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="log-date">${e[1]} ${e[4] ? moodEmoji(e[4]) : ''}</div>
+          <button onclick="deleteDiaryEntry(${e[0]})" style="background:none;border:none;cursor:pointer;color:var(--text-soft);font-size:0.75rem;">Delete</button>
+        </div>
+        ${e[2] ? `<div style="font-weight:500;font-size:0.9rem;color:var(--text);margin:0.3rem 0;">${e[2]}</div>` : ''}
+        <div class="log-notes" style="white-space:pre-wrap;">${e[3]}</div>
+      </div>`).join('');
+  }
+
+  async function deleteDiaryEntry(id) {
+    try {
+      await fetch(API + '/diary/delete?id=' + id + '&userId=' + currentUser.id);
+      showToast('Entry deleted');
+      await loadDiaryEntries();
+    } catch(e) { showToast('Could not delete entry', '#c97b7b'); }
+  }
+
+  // TRACKER TAB
+  async function saveTrackerPeriod() {
+    const start = document.getElementById('trackerPeriodStart').value;
+    const end = document.getElementById('trackerPeriodEnd').value;
+    if (!start || !end) { showToast('Please select both dates 🌸', '#c97b7b'); return; }
+    try {
+      await fetch(API + '/period', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({userId: currentUser.id, startDate: start, endDate: end})
+      });
+      showToast('Period saved! 🌸');
+      document.getElementById('trackerPeriodStart').value = '';
+      document.getElementById('trackerPeriodEnd').value = '';
+      document.querySelectorAll('.pill.flow').forEach(x => x.classList.remove('selected'));
+      await loadPeriodHistory();
+      renderTrackerCycle();
+    } catch(e) { showToast('Could not save period', '#c97b7b'); }
+  }
+
+  function renderTrackerCycle() {
+    const el = document.getElementById('trackerCyclePrediction');
+    if (!el) return;
+    if (!periodHistory || periodHistory.length < 1) {
+      el.innerHTML = '<div class="empty-state">Log at least 2 periods to predict 🌙</div>'; return;
+    }
+    const lastPeriod = periodHistory[0];
+    const lastStart = new Date(lastPeriod[0]);
+    const lastEnd = new Date(lastPeriod[1]);
+    const periodDays = Math.round((lastEnd - lastStart)/(1000*60*60*24)) + 1;
+    let avgCycle = 28;
+    if (periodHistory.length >= 2) {
+      const gaps = [];
+      for (let i = 0; i < periodHistory.length - 1; i++) {
+        const diff = (new Date(periodHistory[i][0]) - new Date(periodHistory[i+1][0]))/(1000*60*60*24);
+        if (diff > 0) gaps.push(diff);
+      }
+      if (gaps.length > 0) avgCycle = Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length);
+    }
+    const nextCycle = new Date(lastStart); nextCycle.setDate(lastStart.getDate() + avgCycle);
+    const ovulationPeak = new Date(lastStart); ovulationPeak.setDate(lastStart.getDate() + Math.round(avgCycle/2));
+    const ovulationStart = new Date(lastStart); ovulationStart.setDate(lastStart.getDate() + Math.round(avgCycle/2) - 4);
+    const ovulationEnd = new Date(lastStart); ovulationEnd.setDate(lastStart.getDate() + Math.round(avgCycle/2) + 2);
+    const today = new Date();
+    const daysToNext = Math.round((nextCycle - today)/(1000*60*60*24));
+    const daysToPeak = Math.round((ovulationPeak - today)/(1000*60*60*24));
+    const daysToStart = Math.round((ovulationStart - today)/(1000*60*60*24));
+    const daysToEnd = Math.round((ovulationEnd - today)/(1000*60*60*24));
+    let ovulationStatus = '';
+    if (daysToEnd < 0) ovulationStatus = `<span style="color:var(--text-soft);">Fertile window passed 🌸</span>`;
+    else if (daysToStart <= 0 && daysToEnd >= 0) ovulationStatus = `<span style="color:#e8a0a0;font-weight:500;">🔴 In fertile window now!</span>`;
+    else ovulationStatus = `Fertile window in <strong>${daysToStart} days</strong>`;
+    const historyHtml = periodHistory.slice(0,5).map(p => {
+      const s = new Date(p[0]); const e = new Date(p[1]);
+      const dur = Math.round((e-s)/(1000*60*60*24))+1;
+      return `<div style="font-size:0.78rem;color:var(--text-soft);padding:0.4rem 0;border-bottom:1px solid rgba(200,120,120,0.1);">
+        📅 ${s.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} – ${e.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}
+        <span style="color:var(--rose-deep);margin-left:0.5rem;">${dur} days</span>
+        ${p[2]>0?`<span style="color:var(--text-soft);margin-left:0.5rem;">Cycle: ${p[2]} days</span>`:''}
+      </div>`;
+    }).join('');
+    el.innerHTML = `
+      <div class="predict-box" style="margin-bottom:0.8rem;">
+        <div class="predict-date">${nextCycle.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+        <div class="predict-label">Next period · ${daysToNext>0?'in '+daysToNext+' days':daysToNext===0?'TODAY':'overdue by '+Math.abs(daysToNext)+' days'} · avg ${avgCycle}-day cycle</div>
+      </div>
+      <div style="background:rgba(168,196,162,0.15);border-radius:12px;padding:0.9rem;border-left:3px solid var(--sage);margin-bottom:0.8rem;">
+        <div style="font-size:0.82rem;font-weight:500;color:var(--text);margin-bottom:0.3rem;">🥚 Ovulation</div>
+        <div style="font-size:0.8rem;color:var(--text-soft);">Peak: <strong>${ovulationPeak.toLocaleDateString('en-IN',{day:'numeric',month:'long'})}</strong> (${daysToPeak>0?'in '+daysToPeak+' days':daysToPeak===0?'TODAY':Math.abs(daysToPeak)+' days ago'})</div>
+        <div style="font-size:0.78rem;color:var(--text-soft);margin-top:0.2rem;">Window: ${ovulationStart.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} – ${ovulationEnd.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+        <div style="font-size:0.8rem;margin-top:0.4rem;">${ovulationStatus}</div>
+      </div>
+      ${historyHtml ? `<div><div style="font-size:0.78rem;font-weight:500;color:var(--text-soft);margin-bottom:0.3rem;">Period History</div>${historyHtml}</div>` : ''}
+      <div style="font-size:0.72rem;color:var(--text-soft);margin-top:0.6rem;font-style:italic;">⚠️ Estimate based on logged period dates.</div>`;
+  }
+
+  function moodEmoji(mood){return{Happy:'😊',Sad:'😢',Anxious:'😰',Irritable:'😤',Calm:'😌',Tired:'😴'}[mood]||'🌸';}
+
+  function showToast(msg,bg='#7a9e74'){
+    const t=document.getElementById('toast');
+    t.textContent=msg;t.style.background=bg;
+    t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
+  }
+</script>
+</body>
+</html>
